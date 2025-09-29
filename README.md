@@ -4,7 +4,7 @@ Aplicación para convertir imágenes, videos y audio entre diferentes formatos.
 
 ## Descarga
 
-**[Descargar ConversorMultimedia.exe](https://github.com/tu-usuario/conversor-multimedia/releases)**
+**[Descargar ConversorMultimedia.exe]([https://github.com/tu-usuario/conversor-multimedia/releases](https://github.com/MarcBasas/Multimedia_Conversor/releases/tag/v1.0.0))**
 
 No necesitas instalar Python ni dependencias adicionales. Solo descarga y ejecuta.
 
