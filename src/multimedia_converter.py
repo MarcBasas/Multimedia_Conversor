@@ -46,6 +46,11 @@ class MultimediaConverter:
         self.audio_bitrate = tk.StringVar(value="128k")
         self.audio_sample_rate = tk.IntVar(value=44100)
         
+        # Variables específicas para GIF
+        self.gif_fps = tk.IntVar(value=10)
+        self.gif_duration = tk.StringVar(value="") 
+        self.gif_optimize = tk.BooleanVar(value=True)
+        
         self.output_folder = None
         self.setup_ui()
         self.update_format_options()
@@ -293,7 +298,7 @@ class MultimediaConverter:
     
     def setup_video_options(self):
         # Formatos de video
-        formats = ["MP4", "AVI", "MOV", "MKV", "WEBM", "FLV"]
+        formats = ["MP4", "AVI", "MOV", "MKV", "WEBM", "FLV", "GIF"]
         self.output_format.set("MP4")
         
         for fmt in formats:
@@ -303,7 +308,8 @@ class MultimediaConverter:
                 variable=self.output_format,
                 value=fmt,
                 bg='#f0f0f0',
-                fg='#333'
+                fg='#333',
+                command=self.update_video_format_options
             ).pack(side='left', padx=8, pady=5)
         
         # Opciones de video
@@ -346,6 +352,45 @@ class MultimediaConverter:
         tk.Entry(resize_frame, textvariable=self.resize_width, width=6).pack(side='left', padx=2)
         tk.Label(resize_frame, text="H:", bg='#f0f0f0', fg='#333').pack(side='left', padx=(5, 0))
         tk.Entry(resize_frame, textvariable=self.resize_height, width=6).pack(side='left', padx=2)
+        
+        # Crear frame para opciones específicas de GIF (inicialmente oculto)
+        self.gif_options_frame = tk.Frame(self.options_frame, bg='#f0f0f0')
+        
+        # Opciones específicas para GIF
+        gif_fps_frame = tk.Frame(self.gif_options_frame, bg='#f0f0f0')
+        gif_fps_frame.pack(fill='x', padx=10, pady=5)
+        
+        tk.Label(gif_fps_frame, text="GIF FPS:", bg='#f0f0f0', fg='#333').pack(side='left')
+        gif_fps_combo = ttk.Combobox(
+            gif_fps_frame,
+            textvariable=self.gif_fps,
+            values=[5, 10, 15, 20, 24, 30],
+            width=6
+        )
+        gif_fps_combo.pack(side='left', padx=5)
+        
+        tk.Label(gif_fps_frame, text="Duración (seg):", bg='#f0f0f0', fg='#333').pack(side='left', padx=(15, 0))
+        tk.Entry(gif_fps_frame, textvariable=self.gif_duration, width=8).pack(side='left', padx=5)
+        tk.Label(gif_fps_frame, text="(vacío = completo)", bg='#f0f0f0', fg='#888', font=("Arial", 8)).pack(side='left', padx=5)
+        
+        tk.Checkbutton(
+            self.gif_options_frame,
+            text="Optimizar GIF",
+            variable=self.gif_optimize,
+            bg='#f0f0f0',
+            fg='#333'
+        ).pack(anchor='w', padx=10, pady=5)
+        
+        # Llamar para mostrar/ocultar opciones según formato inicial
+        self.update_video_format_options()
+    
+    def update_video_format_options(self):
+        """Mostrar/ocultar opciones específicas según el formato seleccionado"""
+        if hasattr(self, 'gif_options_frame'):
+            if self.output_format.get() == "GIF":
+                self.gif_options_frame.pack(fill='x', padx=10, pady=5)
+            else:
+                self.gif_options_frame.pack_forget()
     
     def setup_audio_options(self):
         # Formatos de audio
@@ -533,35 +578,60 @@ class MultimediaConverter:
                 height = self.resize_height.get()
                 video = video.resize((width, height))
             
-            # Cambiar FPS si es necesario
-            if self.video_fps.get() != video.fps:
-                video = video.set_fps(self.video_fps.get())
-            
             # Determinar ruta de salida
             extension = self.output_format.get().lower()
             output_path = self._get_output_path(file_path, extension)
             
-            # Configurar codec según formato
-            codec_map = {
-                'mp4': 'libx264',
-                'avi': 'libxvid',
-                'mov': 'libx264',
-                'mkv': 'libx264',
-                'webm': 'libvpx',
-                'flv': 'flv'
-            }
-            
-            codec = codec_map.get(extension, 'libx264')
-            bitrate = self.video_bitrate.get()
-            
-            # Escribir video
-            video.write_videofile(
-                output_path,
-                codec=codec,
-                bitrate=bitrate,
-                verbose=False,
-                logger=None
-            )
+            # Conversión específica para GIF
+            if extension == 'gif':
+                # Configurar FPS específico para GIF
+                gif_fps = self.gif_fps.get()
+                video = video.set_fps(gif_fps)
+                
+                # Recortar duración si se especifica
+                duration_str = self.gif_duration.get().strip()
+                if duration_str:
+                    try:
+                        duration = float(duration_str)
+                        video = video.subclip(0, min(duration, video.duration))
+                    except ValueError:
+                        pass  # Ignorar si no es un número válido
+                
+                # Escribir GIF
+                video.write_gif(
+                    output_path,
+                    fps=gif_fps,
+                    opt='OptimizePlus' if self.gif_optimize.get() else None,
+                    verbose=False,
+                    logger=None
+                )
+            else:
+                # Conversión para otros formatos de video
+                # Cambiar FPS si es necesario
+                if self.video_fps.get() != video.fps:
+                    video = video.set_fps(self.video_fps.get())
+                
+                # Configurar codec según formato
+                codec_map = {
+                    'mp4': 'libx264',
+                    'avi': 'libxvid',
+                    'mov': 'libx264',
+                    'mkv': 'libx264',
+                    'webm': 'libvpx',
+                    'flv': 'flv'
+                }
+                
+                codec = codec_map.get(extension, 'libx264')
+                bitrate = self.video_bitrate.get()
+                
+                # Escribir video
+                video.write_videofile(
+                    output_path,
+                    codec=codec,
+                    bitrate=bitrate,
+                    verbose=False,
+                    logger=None
+                )
     
     def _convert_audio(self, file_path):
         """Convertir audio usando Pydub"""

@@ -1,0 +1,42 @@
+# Ejecutables
+dist/
+build/
+*.exe
+*.app
+*.dmg
+*.deb
+*.rpm
+
+# PyInstaller
+*.spec
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+venv/
+env/
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Archivos temporales
+temp/
+tmp/
+*.tmp
+
+# Certificados y claves (para firma de código)
+*.p12
+*.pem
+*.key

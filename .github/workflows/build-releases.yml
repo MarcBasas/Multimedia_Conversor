@@ -1,0 +1,68 @@
+name: Build Multi-Platform Releases
+
+on:
+  push:
+    tags:
+      - 'v*'  # Ejecutar cuando se cree un tag de versión
+  workflow_dispatch:  # Permitir ejecución manual
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            artifact_name: ConversorMultimedia.exe
+          - os: macos-latest
+            platform: macos
+            artifact_name: ConversorMultimedia.app
+          - os: ubuntu-latest
+            platform: linux
+            artifact_name: ConversorMultimedia
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r src/requirements.txt
+
+    - name: Build executable
+      run: |
+        cd src
+        python build_exe.py
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: conversor-multimedia-${{ matrix.platform }}
+        path: dist/${{ matrix.artifact_name }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          conversor-multimedia-windows/ConversorMultimedia.exe
+          conversor-multimedia-macos/ConversorMultimedia.app
+          conversor-multimedia-linux/ConversorMultimedia
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
