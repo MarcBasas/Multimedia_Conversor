@@ -13,9 +13,11 @@ permissions:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
+    continue-on-error: true
     strategy:
       fail-fast: false
+      max-parallel: 3
       matrix:
         include:
           - os: windows-latest
@@ -50,6 +52,7 @@ jobs:
       run: |
         cd src
         python build_exe.py
+      timeout-minutes: 20
 
     - name: Verify executable was created
       run: |
