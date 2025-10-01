@@ -57,9 +57,18 @@ jobs:
     - name: Verify executable was created
       run: |
         ls -la dist/
-        if [ ! -f "dist/${{ matrix.artifact_name }}" ]; then
-          echo "ERROR: Executable not found!"
-          exit 1
+        if [[ "${{ matrix.platform }}" == "macos" ]]; then
+          if [ ! -d "dist/${{ matrix.artifact_name }}" ]; then
+            echo "ERROR: macOS app bundle not found!"
+            exit 1
+          fi
+          echo "macOS app bundle created successfully"
+        else
+          if [ ! -f "dist/${{ matrix.artifact_name }}" ]; then
+            echo "ERROR: Executable not found!"
+            exit 1
+          fi
+          echo "Executable created successfully"
         fi
       shell: bash
 
@@ -67,7 +76,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: conversor-multimedia-${{ matrix.platform }}
-        path: dist/${{ matrix.artifact_name }}
+        path: |
+          dist/${{ matrix.artifact_name }}
+          dist/${{ matrix.artifact_name }}/**
 
   release:
     needs: build
