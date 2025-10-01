@@ -3,8 +3,8 @@ name: Build Multi-Platform Releases
 on:
   push:
     tags:
-      - 'v*'  # Ejecutar cuando se cree un tag de versión
-  workflow_dispatch:  # Permitir ejecución manual
+      - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -60,7 +60,7 @@ jobs:
         fi
       shell: bash
 
-     - name: Upload artifact
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: conversor-multimedia-${{ matrix.platform }}
@@ -88,18 +88,15 @@ jobs:
         prerelease: false
         generate_release_notes: true
         body: |
-          ## 🎉 Nueva versión del Conversor Multimedia
+          ## Nueva version del Conversor Multimedia
           
-          ### Descargas por plataforma:
-          - 🪟 **Windows**: ConversorMultimedia.exe
-          - 🍎 **macOS**: ConversorMultimedia.app  
-          - 🐧 **Linux**: ConversorMultimedia
+          ### Ahora acepta los siguientes Sistemas Operativos:
+          - **Windows**: ConversorMultimedia.exe
+          - **macOS**: ConversorMultimedia.app  
+          - **Linux**: ConversorMultimedia
           
-          ### Características:
-          - ✅ Conversión de imágenes, videos y audio
-          - ✅ **NUEVO**: Conversión de video a GIF
-          - ✅ Interfaz gráfica intuitiva
-          - ✅ Procesamiento por lotes
-          - ✅ Sin dependencias adicionales
+          ### Funcionalidades añadidas:
+          - Soporte de conversion GIF
+          
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
