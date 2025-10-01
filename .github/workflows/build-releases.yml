@@ -6,6 +6,10 @@ on:
       - 'v*'  # Ejecutar cuando se cree un tag de versión
   workflow_dispatch:  # Permitir ejecución manual
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -26,9 +30,14 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+
+    - name: Install system dependencies (macOS)
+      if: matrix.platform == 'macos'
+      run: |
+        brew install ffmpeg
 
     - name: Install dependencies
       run: |
@@ -41,7 +50,7 @@ jobs:
         python build_exe.py
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: conversor-multimedia-${{ matrix.platform }}
         path: dist/*
@@ -53,7 +62,7 @@ jobs:
     
     steps:
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: artifacts
 
