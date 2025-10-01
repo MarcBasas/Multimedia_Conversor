@@ -44,7 +44,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: conversor-multimedia-${{ matrix.platform }}
-        path: dist/${{ matrix.artifact_name }}
+        path: dist/*
 
   release:
     needs: build
@@ -54,15 +54,32 @@ jobs:
     steps:
     - name: Download all artifacts
       uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+
+    - name: Display structure of downloaded files
+      run: ls -la artifacts/
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          conversor-multimedia-windows/ConversorMultimedia.exe
-          conversor-multimedia-macos/ConversorMultimedia.app
-          conversor-multimedia-linux/ConversorMultimedia
+        files: artifacts/*/*
         draft: false
         prerelease: false
+        generate_release_notes: true
+        body: |
+          ## 🎉 Nueva versión del Conversor Multimedia
+          
+          ### Descargas por plataforma:
+          - 🪟 **Windows**: ConversorMultimedia.exe
+          - 🍎 **macOS**: ConversorMultimedia.app  
+          - 🐧 **Linux**: ConversorMultimedia
+          
+          ### Características:
+          - ✅ Conversión de imágenes, videos y audio
+          - ✅ **NUEVO**: Conversión de video a GIF
+          - ✅ Interfaz gráfica intuitiva
+          - ✅ Procesamiento por lotes
+          - ✅ Sin dependencias adicionales
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
