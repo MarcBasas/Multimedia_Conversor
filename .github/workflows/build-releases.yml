@@ -13,7 +13,9 @@ permissions:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -49,16 +51,25 @@ jobs:
         cd src
         python build_exe.py
 
+    - name: Verify executable was created
+      run: |
+        ls -la dist/
+        if [ ! -f "dist/${{ matrix.artifact_name }}" ]; then
+          echo "ERROR: Executable not found!"
+          exit 1
+        fi
+      shell: bash
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: conversor-multimedia-${{ matrix.platform }}
-        path: dist/*
+        path: dist/${{ matrix.artifact_name }}
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') && always()
     
     steps:
     - name: Download all artifacts

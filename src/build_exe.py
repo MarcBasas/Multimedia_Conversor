@@ -61,10 +61,7 @@ def build_executable():
             "--osx-bundle-identifier=com.conversor.multimedia",
             "--codesign-identity=-"  # Firma temporal para desarrollo
         ])
-    elif system == "Windows":
-        cmd.extend([
-            "--version-file=version_info.txt"  # Si existe archivo de versión
-        ])
+    # Para Windows no añadimos configuraciones adicionales por ahora
     
     try:
         print(f"Construyendo ejecutable para {system}...")
@@ -72,31 +69,31 @@ def build_executable():
         
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         
-        print("✅ Ejecutable creado exitosamente!")
-        print(f"📁 Ubicación: dist/{config['name']}{config['extension']}")
+        print("OK Ejecutable creado exitosamente!")
+        print(f"Ubicacion: dist/{config['name']}{config['extension']}")
         
         # Información específica por plataforma
         if system == "Darwin":
-            print("\n🍎 Para macOS:")
+            print("\nPara macOS:")
             print("- El archivo .app se puede ejecutar directamente")
             print("- Para distribuir, considera firmar con certificado de desarrollador")
         elif system == "Windows":
-            print("\n🪟 Para Windows:")
+            print("\nPara Windows:")
             print("- El archivo .exe se puede ejecutar directamente")
-            print("- No requiere instalación de Python")
+            print("- No requiere instalacion de Python")
         else:
-            print("\n🐧 Para Linux:")
+            print("\nPara Linux:")
             print("- Ejecutar desde terminal: ./ConversorMultimedia")
-            print("- Dar permisos de ejecución: chmod +x ConversorMultimedia")
+            print("- Dar permisos de ejecucion: chmod +x ConversorMultimedia")
         
     except subprocess.CalledProcessError as e:
-        print("❌ Error al crear el ejecutable:")
+        print("ERROR: Error al crear el ejecutable:")
         print(e.stderr)
         return False
     
     except FileNotFoundError:
-        print("❌ PyInstaller no está instalado.")
-        print("Instálalo con: pip install pyinstaller")
+        print("ERROR: PyInstaller no esta instalado.")
+        print("Instalalo con: pip install pyinstaller")
         return False
     
     return True
