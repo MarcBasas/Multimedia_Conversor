@@ -25,7 +25,7 @@ jobs:
             artifact_name: ConversorMultimedia.exe
           - os: macos-latest
             platform: macos
-            artifact_name: ConversorMultimedia.app
+            artifact_name: ConversorMultimedia
           - os: ubuntu-latest
             platform: linux
             artifact_name: ConversorMultimedia
@@ -57,28 +57,18 @@ jobs:
     - name: Verify executable was created
       run: |
         ls -la dist/
-        if [[ "${{ matrix.platform }}" == "macos" ]]; then
-          if [ ! -d "dist/${{ matrix.artifact_name }}" ]; then
-            echo "ERROR: macOS app bundle not found!"
-            exit 1
-          fi
-          echo "macOS app bundle created successfully"
-        else
-          if [ ! -f "dist/${{ matrix.artifact_name }}" ]; then
-            echo "ERROR: Executable not found!"
-            exit 1
-          fi
-          echo "Executable created successfully"
+        if [ ! -f "dist/${{ matrix.artifact_name }}" ]; then
+          echo "ERROR: Executable not found!"
+          exit 1
         fi
+        echo "Executable created successfully"
       shell: bash
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: conversor-multimedia-${{ matrix.platform }}
-        path: |
-          dist/${{ matrix.artifact_name }}
-          dist/${{ matrix.artifact_name }}/**
+        path: dist/${{ matrix.artifact_name }}
 
   release:
     needs: build
@@ -106,7 +96,7 @@ jobs:
           
           ### Ahora acepta los siguientes Sistemas Operativos:
           - **Windows**: ConversorMultimedia.exe
-          - **macOS**: ConversorMultimedia.app  
+          - **macOS**: ConversorMultimedia (ejecutable Unix)
           - **Linux**: ConversorMultimedia
           
           ### Funcionalidades añadidas:

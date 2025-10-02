@@ -22,7 +22,7 @@ def get_platform_config():
         return {
             "windowed": True,
             "name": "ConversorMultimedia",
-            "extension": ".app"
+            "extension": ""
         }
     else:  # Linux y otros
         return {
@@ -75,7 +75,8 @@ def build_executable():
         # Información específica por plataforma
         if system == "Darwin":
             print("\nPara macOS:")
-            print("- El archivo .app se puede ejecutar directamente")
+            print("- Ejecutar desde terminal: ./ConversorMultimedia")
+            print("- O hacer doble clic en Finder")
             print("- Para distribuir, considera firmar con certificado de desarrollador")
         elif system == "Windows":
             print("\nPara Windows:")
